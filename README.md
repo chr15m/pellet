@@ -1,10 +1,12 @@
-Tiny PHP service for web apps.
+Tiny PHP service for single-page web apps.
 
 This is an API that provides:
 
  * Simple Text-file based authentication.
  * Storage of authenticated client state in simple text files.
  * Simple proxying of ajax GET requests.
+
+This is only intended for small self-hosted single-page web apps with a handful of users. Cross-domain requests are permitted by default in the code. **It's probably full of security holes**. Don't use this for production websites with lots of users and don't store important data with this.
 
 ### Endpoints ###
 
