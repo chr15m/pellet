@@ -13,7 +13,7 @@ $authfile = file_get_contents($authfilename);
 
 // if the file does not exist yet
 if ($authfile == false) {
-  ensure_authfile();
+  ensure_authfile($authfilename);
 // the authfile exists
 } else {
   // set up the session
@@ -63,7 +63,7 @@ function parse_authfile($authfile) {
 }
 
 // create an authfile and do not proceed without one
-function ensure_authfile() {
+function ensure_authfile($authfilename) {
   // if they have asked us to create the first auth
   if (isset($_REQUEST['username']) && isset($_REQUEST['password'])) {
     // create the first authfile
