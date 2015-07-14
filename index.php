@@ -5,33 +5,84 @@ header("Content-type: text/plain");
 // allow cross-domain requests to this API by default
 cors();
 
-// location of the authfile
-$authfilename = "users.txt";
+// authenticate the user - script may exit here
+authenticate();
 
-// Authenticates users against a text file of username/password pairs.
-$authfile = file_get_contents($authfilename);
-
-// if the file does not exist yet
-if ($authfile == false) {
-  ensure_authfile($authfilename);
-// the authfile exists
+// check which major function they want to call otherwise
+if (isset($_REQUEST["proxy"])) {
+  proxy();
+} elseif (isset($_REQUEST["state"])) {
+  state();
 } else {
-  // set up the session
-  session_start();
-  // regenerate the session key every so often
-  session_refresh();
-  // is the user logged in already?
-  if(!isset($_SESSION['user'])) {
-    $authtable = parse_authfile($authfile);
-    check_credentials($authtable);
+  // if we got to here nothing has been returned yet
+  // assume auth request and return something useful
+  die(json_encode("AUTHENTICATED"));
+}
+
+// ******* Main functions ******* //
+
+// authenticate a user
+function authenticate() {
+  // location of the authfile
+  $authfilename = "users.txt";
+
+  // Authenticates users against a text file of username/password pairs.
+  $authfile = file_get_contents($authfilename);
+
+  // if the file does not exist yet
+  if ($authfile == false) {
+    ensure_authfile($authfilename);
+  // the authfile exists
   } else {
-    // user requested logout
-    if (isset($_REQUEST["logout"])) {
-      session_destroy();
-      die(json_encode("AUTH_LOGGED_OUT"));
+    // set up the session
+    session_start();
+    // regenerate the session key every so often
+    session_refresh();
+    // is the user logged in already?
+    if(!isset($_SESSION['user'])) {
+      $authtable = parse_authfile($authfile);
+      check_credentials($authtable);
+    } else {
+      // user requested logout
+      if (isset($_REQUEST["logout"])) {
+        session_destroy();
+        die(json_encode("AUTH_LOGGED_OUT"));
+      }
     }
   }
 }
+
+// simple server side storage of an authenticated client's state
+function state() {
+  // where this user's state is stored
+  $statefilename = basename(str_replace(".", "", $_SESSION["user"])) . ".txt";
+  // if the use is POSTing a new state
+  if (isset($_REQUEST["state"]) && $_REQUEST["state"] != NULL) {
+    file_put_contents($statefilename, $_REQUEST["state"]);
+    die(json_encode("STATE_WRITTEN"));
+  } else {
+    // load up this users's session file (if any) and return it
+    die(file_get_contents($statefilename));
+  }
+}
+
+// very simple proxy server for cross-domain ajax GET requests for authenticated clients
+function proxy() {
+  // fetch a remote file and output it directly - ensuring it's an HTTP request
+  if ($_REQUEST["proxy"] && (substr($_REQUEST["proxy"], 0, 7) === "http://" || substr($_REQUEST["proxy"], 0, 8) === "https://")) {
+    $response = file_get_contents($_REQUEST["proxy"]);
+    // if the destination returns json then don't double encode
+    if (strpos($_SERVER['QUERY_STRING'], "json") !== false) {
+      die($response);
+    } else {
+      die(json_encode($response));
+    }
+  } else {
+    die(json_encode("INVALID"));
+  }
+}
+
+// ******* Helper functions ******* //
 
 // refresh the session id every few requests to prevent session hijacking
 function session_refresh() {
