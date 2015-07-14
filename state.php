@@ -5,7 +5,7 @@
 include("auth.php");
 
 // where this user's state is stored
-$statefilename = $_SESSION["user"] . ".txt";
+$statefilename = basename(str_replace($_SESSION["user"], ".", "")) . ".txt";
 
 // if the use is POSTing a new state
 if (isset($_REQUEST["state"])) {
