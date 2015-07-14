@@ -35,7 +35,7 @@ if ($authfile == false) {
 
 // refresh the session id every few requests to prevent session hijacking
 function session_refresh() {
-  if (++$_SESSION['session-regeneration-counter'] >= 16) {
+  if (!isset($_SESSION['session-regeneration-counter']) || ++$_SESSION['session-regeneration-counter'] >= 16) {
     $_SESSION['session-regeneration-counter'] = 0;
     session_regenerate_id(true);
   }
