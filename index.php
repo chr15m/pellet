@@ -58,11 +58,21 @@ function state() {
   $statefilename = basename(str_replace(".", "", $_SESSION["user"])) . ".txt";
   // if the use is POSTing a new state
   if (isset($_REQUEST["state"]) && $_REQUEST["state"] != NULL) {
-    file_put_contents($statefilename, $_REQUEST["state"]);
-    die(json_encode("STATE_WRITTEN"));
+    json_decode($_REQUEST["state"]);
+    if (json_last_error() == JSON_ERROR_NONE) {
+      file_put_contents($statefilename, $_REQUEST["state"]);
+      die(json_encode("STATE_WRITTEN"));
+    } else {
+      die(json_encode("STATE_NOT_JSON_ERROR"));
+    }
   } else {
     // load up this users's session file (if any) and return it
-    die(file_get_contents($statefilename));
+    $statefile = file_get_contents($statefilename);
+    if ($statefile) {
+      die($statefile);
+    } else {
+      die(json_encode(NULL));
+    }
   }
 }
 
