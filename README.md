@@ -12,6 +12,8 @@ This is intended for small, self-hosted, single-page web apps with a handful of 
 
 ### Endpoints ###
 
+All API requests result in valid JSON.
+
 Log a user in (if no user exists yet this call creates the first user with the specified password).
 
 	/index.php&username=bob&password=hello
@@ -20,11 +22,11 @@ Proxy an ajax GET request via the server.
 
 	/index.php?proxy=http://example.com/mysite.json
 
-Write the current user's state to the server.
+Write the current user's state to the server - must be valid JSON.
 
-	/index.php?state=this+is+a+string+containing+my+state
+	/index.php?state="this+is+a+string+containing+my+state"
 
-Read the current user's state from the server.
+Read the current user's state from the server - returns `nil` if no state yet written.
 
 	/index.php?state
 
@@ -59,4 +61,6 @@ Each user's state is stored in a file called `USERNAME.txt` where USERNAME is th
  * `AUTHENTICATED` = When a user is successfully authenticated.
  * `AUTH_LOGGED_OUT` = When a request to `/auth.php?logout` is made and the user has successfully been logged out, session deleted.
  * `STATE_WRITTEN` = When a request to `/state.php?state=...` has successfully written the state to the user's state file.
+ * `STATE_WRITTEN` = When a request to `/state.php?state=...` has successfully written the state to the user's state file.
+ * `STATE_NOT_JSON_ERROR` = When an attempt is made to write to the state in a format that is not valid JSON.
 
