@@ -16,7 +16,7 @@ if (isset($_REQUEST["proxy"])) {
 } else {
   // if we got to here nothing has been returned yet
   // assume auth request and return something useful
-  die(json_encode("AUTHENTICATED"));
+  success("AUTHENTICATED");
 }
 
 // ******* Main functions ******* //
@@ -46,7 +46,7 @@ function authenticate() {
       // user requested logout
       if (isset($_REQUEST["logout"])) {
         session_destroy();
-        die(json_encode("AUTH_LOGGED_OUT"));
+        success("AUTH_LOGGED_OUT");
       }
     }
   }
@@ -61,9 +61,9 @@ function state() {
     json_decode($_REQUEST["state"]);
     if (json_last_error() == JSON_ERROR_NONE) {
       file_put_contents($statefilename, $_REQUEST["state"]);
-      die(json_encode("STATE_WRITTEN"));
+      success("STATE_WRITTEN");
     } else {
-      die(json_encode("STATE_NOT_JSON_ERROR"));
+      error("STATE_NOT_JSON_ERROR");
     }
   } else {
     // load up this users's session file (if any) and return it
@@ -88,7 +88,7 @@ function proxy() {
       die(json_encode($response));
     }
   } else {
-    die(json_encode("INVALID"));
+    error("INVALID_PROXY_REQUEST");
   }
 }
 
@@ -129,10 +129,10 @@ function ensure_authfile($authfilename) {
   if (isset($_REQUEST['username']) && isset($_REQUEST['password'])) {
     // create the first authfile
     file_put_contents($authfilename, $_REQUEST['username'] . ": " . htpass($_REQUEST['password']));
-    die(json_encode("AUTH_FILE_CREATED"));
+    success("AUTH_FILE_CREATED");
   } else {
     header('HTTP/1.0 403 Forbidden');
-    die(json_encode("AUTH_NO_FILE"));
+    error("AUTH_NO_FILE");
   }
 }
 
@@ -143,16 +143,16 @@ function check_credentials($authtable) {
       if($authtable[$_REQUEST['username']] == $_REQUEST['password'] || $authtable[$_REQUEST['username']] == htpass($_REQUEST['password'])) {
         // auth okay, setup session
         $_SESSION['user'] = $_REQUEST['username'];
-        // redirect to required page
-        die(json_encode("AUTHENTICATED"));
+        // return the fact the user was successfully logged in
+        success("AUTHENTICATED");
       } else {
         header('HTTP/1.0 403 Forbidden');
-        die(json_encode("AUTH_FAILED"));
+        error("AUTH_FAILED");
       }
     } else {
       // username and password not given so go back to login
       header('HTTP/1.0 403 Forbidden');
-      die(json_encode("AUTH_NO_CREDENTIALS"));
+      error("AUTH_NO_CREDENTIALS");
     }
 }
 
@@ -171,5 +171,13 @@ function cors() {
             header("Access-Control-Allow-Headers: {$_SERVER['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}");
         exit(0);
     }
+}
+
+function error($code) {
+  die(json_encode(Array("api-error" => $code)));
+}
+
+function success($code) {
+  die(json_encode(Array("api" => $code)));
 }
 ?>

@@ -54,13 +54,18 @@ Each user's state is stored in a file called `USERNAME.txt` where USERNAME is th
 
 ### API Response Codes ###
 
+Error codes are JSON of the form `{"api-error": ...error code... }`:
+
  * `AUTH_NO_FILE` = `users.txt` file does not exist yet. Make a request with `username` and `password` parameters set to create the file.
- * `AUTH_FILE_CREATED` = Request with `username` and `password` has successfully resulted in the `users.txt` file being created.
  * `AUTH_NO_CREDENTIALS` = User is not logged in and no `username` and `password` parameters were passed.
  * `AUTH_FAILED` = `username` and `password` parameters were supplied but don't match any in the `users.txt` file.
- * `AUTHENTICATED` = When a user is successfully authenticated.
  * `AUTH_LOGGED_OUT` = When a request to `/auth.php?logout` is made and the user has successfully been logged out, session deleted.
- * `STATE_WRITTEN` = When a request to `/state.php?state=...` has successfully written the state to the user's state file.
- * `STATE_WRITTEN` = When a request to `/state.php?state=...` has successfully written the state to the user's state file.
  * `STATE_NOT_JSON_ERROR` = When an attempt is made to write to the state in a format that is not valid JSON.
+ * `INVALID_PROXY_REQUEST` = A proxy request was made but the URL was invalid.
+
+Success codes are JSON of the form `{"api": ...success code... }`:
+
+ * `AUTH_FILE_CREATED` = Request with `username` and `password` has successfully resulted in the `users.txt` file being created.
+ * `AUTHENTICATED` = When a user is successfully authenticated.
+ * `STATE_WRITTEN` = When a request to `/state.php?state=...` has successfully written the state to the user's state file.
 
