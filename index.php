@@ -67,9 +67,13 @@ function state() {
     }
   } else {
     // load up this users's session file (if any) and return it
-    $statefile = file_get_contents($statefilename);
-    if ($statefile) {
-      die($statefile);
+    if (file_exists($statefilename)) {
+      $statefile = file_get_contents($statefilename);
+      if ($statefile) {
+        die($statefile);
+      } else {
+        die(json_encode(NULL));
+      }
     } else {
       die(json_encode(NULL));
     }
