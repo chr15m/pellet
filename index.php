@@ -81,8 +81,9 @@ function proxy() {
   // fetch a remote file and output it directly - ensuring it's an HTTP request
   if ($_REQUEST["proxy"] && (substr($_REQUEST["proxy"], 0, 7) === "http://" || substr($_REQUEST["proxy"], 0, 8) === "https://")) {
     $response = file_get_contents($_REQUEST["proxy"]);
+    json_decode($response);
     // if the destination returns json then don't double encode
-    if (strpos($_SERVER['QUERY_STRING'], "json") !== false) {
+    if (strpos($_SERVER['QUERY_STRING'], "json") !== false && json_last_error() == JSON_ERROR_NONE) {
       die($response);
     } else {
       die(json_encode($response));
